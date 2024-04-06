@@ -1,46 +1,60 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<dos.h> 
 #include<windows.h>
-#include<conio.h>
 #include<unistd.h>
+#include<string.h>
+#include<stdlib.h>
+#include<stdio.h>
+#include<conio.h>
+#include<time.h>
+#include<dos.h> 
 
 #define RED     "\033[1;31m"
 #define GREEN   "\033[1;32m"
 #define YELLOW  "\033[1;33m"
 #define BLUE    "\033[1;34m"
 #define RESET   "\033[0m"
-#define MAX_DATA 52
-#define MAX_ARR 40000
+#define MAX_ARR 52
+#define SIZE 26
+
+typedef long long int ll;
 
 void blink();
 void splash();
 void loadingAnimation();
 void menuLoading();
 
-//Data structure -> Implementing Hash Table Chaining
-enum Game{
-	SNAKE = 0,
-	BLACKJACK = 1
+struct GameData{
+	int snakeScore;
+	int blackJackScore;
+	int bubbleScore;
+	int rpgScore;
 };
 
-struct User{
-	char username[21];
-	char password[21];
-	long long int score;
-	enum Game gameType;
-	struct User* next;
-	struct User* prev;
-}*head[MAX_DATA], *tail[MAX_DATA], *temp, *curr;
+struct Account{
+	char username[MAX_ARR];
+	char password[MAX_ARR];
+};
+
+struct Data{
+	GameData* gameData;
+	Account* account;
+	Data* next;
+	Data* prev;
+}*head[SIZE], *tail[SIZE];
 
 
-int hashing(char username[]){
-	return username[7] - 'A';
+//Hash Function
+int hashFunction(char username[]){
+	for(int i=0; i<strlen(username); i++)
+		if(username[i] >= 'a' && username[i] <= 'z')
+			username[i] -= 32;
+	int temp = 0;
+	for(int i=0; i<strlen(username); i++) temp += username[i];
+	return temp % SIZE;
 }
-struct User dataPrint[MAX_ARR];
 
-void insertUserData(char username[], char password[], long long int score, enum Game type){
+
+//Data structure -> Implementing Hash Table Chaining
+void insertUserData(){
 	int idx = hashing(username);
 	
 	temp = (struct User*)malloc(sizeof(struct User));
