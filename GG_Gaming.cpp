@@ -36,7 +36,7 @@ struct Account{
 
 struct Data{
 	GameData* gameData;
-	Account* account;
+	Account* accountData;
 	Data* next;
 	Data* prev;
 }*head[SIZE], *tail[SIZE];
@@ -54,21 +54,29 @@ int hashFunction(char username[]){
 
 
 //Data structure -> Implementing Hash Table Chaining
-void insertUserData(){
-	int idx = hashing(username);
-	
-	temp = (struct User*)malloc(sizeof(struct User));
-	strcpy(temp->username, username);
-	strcpy(temp->password, password);
-	temp->score = score;
-	temp->gameType = type;
-	temp->next = temp->prev = NULL;
+void insertUserData(const char username[], const char password[], const int snakeScore, const int blackJackScore, const int bubbleScore, const int rpgStore){
+	Account* account = (Account*)malloc(sizeof(Account));
+	strcpy(account->username, username);
+	strcpy(account->password, password);
 
-	if(!head[idx]) head[idx] = tail[idx] = temp;
+	GameData* gameData = (GameData*)malloc(sizeof(GameData));
+	gameData->blackJackScore = blackJackScore;
+	gameData->bubbleScore = bubbleScore;
+	gameData->rpgScore = rpgStore;
+	gameData->snakeScore = snakeScore;
+
+	Data* data = (Data*)malloc(sizeof(Data));
+	data->accountData = account;
+	data->gameData = gameData;
+	data->next = data->prev = NULL;
+
+
+	int idx = hashFunction(account->username);
+	if(!head[idx]) head[idx] = tail[idx] = data;
 	else {
-		tail[idx]->next = temp;
-		temp->prev = tail[idx];
-		tail[idx] = temp;
+		tail[idx]->next = data;
+		data->prev = tail[idx];
+		tail[idx] = data;
 	}
 }
 
@@ -122,11 +130,12 @@ void printScoreBoard(int page) {
 
 void printUser(){
 	system("cls");
-	for(int i=0; i<MAX_DATA; i++){
+	for(int i=0; i<MAX_ARR; i++){
+		Data* curr = head[i];
 		if(head[i]){
 			curr = head[i];
 			while(curr){
-				printf("%s\n", curr->username);
+				printf("%s\n", curr->accountData->username);
 				curr = curr->next;
 			}
 		}
