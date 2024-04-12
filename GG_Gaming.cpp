@@ -81,53 +81,6 @@ void insertUserData(const char username[], const char password[], const int snak
 }
 
 //Admin Data Structure function
-void printScoreBoard(int page) {
-    system("cls");
-    int counter = 1;
-    printf(GREEN);
-    printf("==========================================================================\n");
-    printf("|| " YELLOW "No " GREEN " |" YELLOW " Username\t\t" GREEN "| " YELLOW "Game Played \t\t" GREEN "|"
-           YELLOW " Score \t" GREEN "||\n");
-    printf("==========================================================================\n");
-    printf(RESET);
-    for (int i = page-9; i<page; i++) {
-        if (dataPrint[i].gameType == 0) {
-            printf("|| %-4d | %-20s | SNAKE \t\t| %-7lld \t\t||\n", counter, dataPrint[i].username, dataPrint[i].score);
-            usleep(20000);
-        } else {
-            printf("|| %-4d | %-20s | BLACKJACK \t\t| %-7lld \t\t||\n", counter, dataPrint[i].username, dataPrint[i].score);
-            usleep(20000);
-        }
-        counter++;
-    }
-    printf(GREEN);
-    printf("==========================================================================\n");
-    printf("Pages: [%d]\n", page/10);
-    puts("");
-    printf("input [ a | d ] to move pages\n");
-    printf(RESET);
-    printf("Press enter to exit...");
-
-    char ipt;
-    ipt = getch();
-    switch (ipt) {
-        case 'a':
-            if (page > 0) {
-                printScoreBoard(page - 10);
-            } else {
-                printScoreBoard(page);
-            }
-            break;
-        case 'd':
-            printScoreBoard(page + 10);
-            break;
-        case '\r':
-            break;
-    }
-}
-
-
-
 void printUser(){
 	system("cls");
 	for(int i=0; i<MAX_ARR; i++){
@@ -145,16 +98,16 @@ void printUser(){
 }
 
 void deleteUser(char username[]) {
-    int idx = hashing(username);
+    const int idx = hashFunction(username);
 
     if (!head[idx]) {
         printf(RED "User not found\n" RESET);
         return;
     }
 
-    curr = head[idx];
+    Data* curr = head[idx];
     while (curr) {
-        if (strcmp(curr->username, username) == 0) {
+        if (strcmp(curr->accountData->username, username) == 0) {
             if (curr == head[idx]) {
                 head[idx] = head[idx]->next;
             }
@@ -181,8 +134,7 @@ void deleteUser(char username[]) {
 
 //User Data Structure Function
 void changePassword(char username[], char password[]){
-	int idx = hashing(username);
-
+	int idx = hashFunction(username);
 	if(!head[idx]){
 		printf(RED);
 		printf("No account found\n");
@@ -190,57 +142,44 @@ void changePassword(char username[], char password[]){
 		getch();
 		return;
 	} else{
-		curr = head[idx];
+		Data* curr = head[idx];
 		while(curr){
-			if(strcmp(curr->username, username) == 0){
-				strcpy(curr->password, password);
+			if(strcmp(curr->accountData->username, username) == 0){
+				strcpy(curr->accountData->password, password);
 				break;
 			}
 			curr =  curr->next;
 		}
 	}
-
 }
 
 void insertData(){
-    char username[21];
-    char password[21];
-    long long int score;
-    int type;
-
-    FILE* file = fopen("userData.csv", "r");
+    char username[MAX_ARR];
+	char password[MAX_ARR];
+    int snakeScore;
+    int blackJackScore;
+	int bubbleScore;
+	int rpgScore;
+    FILE* file = fopen("./userData.csv", "r");
     if (file == NULL) {
         printf("Error opening file.\n");
         return;
     }
-
-    while (fscanf(file, "%20[^,],%20[^,],%lld,%d\n", username, password, &score, &type) == 4) {
-        if (type == 0) {
-            insertUserData(username, password, score, SNAKE);
-        } else {
-            insertUserData(username, password, score, BLACKJACK);
-        }
+    while (fscanf(file, "%20[^,],%20[^,],%d,%d,%d,%d\n", username, password, &snakeScore, &blackJackScore, &bubbleScore, &rpgScore) == 6) {
+        insertUserData(username, password, snakeScore, blackJackScore, bubbleScore, rpgScore);
     }
     fclose(file);
 }
 
-void insertPrintData(){
-	int i = 0;
-	FILE* file = fopen("userdata.csv", "r");
-	fclose(file);
-	while (fscanf(file, "%20[^,],%20[^,],%lld,%d\n", dataPrint[i].username, dataPrint[i].password, &dataPrint[i].score, &dataPrint[i].gameType) == 4){
-		i++;
-	}
-}
 
 bool searchingUser(char username[], char password[]){
-	int idx = hashing(username);
+	int idx = hashFunction(username);
 	if(!head[idx]){
 		return false;
 	}
-	curr = head[idx];
+	Data* curr = head[idx];
 	while(curr){
-		if(strcmp(curr->username, username) == 0 && strcmp(curr->password, password) == 0){
+		if(strcmp(curr->accountData->username, username) == 0 && strcmp(curr->accountData->password, password) == 0){
 			return true;
 			break;
 		}
@@ -252,8 +191,6 @@ bool searchingUser(char username[], char password[]){
 bool adminConfirm(char password[]){
 	return (strcmp(password, "admin123") == 0);
 }
-
-
 
 //Animation
 void blink(){
@@ -500,7 +437,7 @@ void adminMenuSwitch(char input){
 		case '1':
 			break;
 		case '2':
-			printScoreBoard(10);
+			// printScoreBoard(10);
 			break;
 		case '3':
 			printUser();
@@ -800,7 +737,7 @@ void swicthing(char comms){
 int main(){
     char input;
 	insertData();
-	insertPrintData();
+	// insertPrintData();
     if(accountCenter()){
 		loadingAnimation();
 		do{
