@@ -17,10 +17,13 @@
 
 typedef long long int ll;
 
+int welcoming = 0;
+
 void blink();
 void splash();
 void loadingAnimation();
 void menuLoading();
+void agentMenu();
 
 struct GameData{
 	int snakeScore;
@@ -54,7 +57,7 @@ int hashFunction(char username[]){
 
 
 //Data structure -> Implementing Hash Table Chaining
-void insertUserData(const char username[], const char password[], const int snakeScore, const int blackJackScore, const int bubbleScore, const int rpgStore){
+void insertUserData(const char username[], const char password[], const int snakeScore, const int blackJackScore, const int bubbleScore, const int rpgScore){
 	Account* account = (Account*)malloc(sizeof(Account));
 	strcpy(account->username, username);
 	strcpy(account->password, password);
@@ -62,7 +65,7 @@ void insertUserData(const char username[], const char password[], const int snak
 	GameData* gameData = (GameData*)malloc(sizeof(GameData));
 	gameData->blackJackScore = blackJackScore;
 	gameData->bubbleScore = bubbleScore;
-	gameData->rpgScore = rpgStore;
+	gameData->rpgScore = rpgScore;
 	gameData->snakeScore = snakeScore;
 
 	Data* data = (Data*)malloc(sizeof(Data));
@@ -405,6 +408,15 @@ void adminArt() {
 	getch();
 }
 
+void printWithDelay(char *str) {
+    for (int i = 0; str[i] != '\0'; i++) {
+        printf("%c", str[i]);
+        fflush(stdout);
+        usleep(50000);
+    }
+}
+
+
 //Mapping
 int sizeR = 20;
 int sizeC = 20;
@@ -431,7 +443,6 @@ void printMap(){
 }
 
 //Admin essential
-
 void adminMenuSwitch(char input){
 	switch(input){
 		case '1':
@@ -517,10 +528,10 @@ bool isSame(char string1[], char string2[]){
 	return (strcmp(string1, string2) == 0);
 }
 
-void insertUser(char username[], char password[]){
+void insertUser(const char username[], const char password[], const int snakeScore, const int blackJackScore, const int bubbleScore, const int rpgScore){
 	FILE* file = fopen("userData.csv", "a");
 	if(file){
-		fprintf(file,"%s,%s,0,0\n", username, password);
+		fprintf(file,"%s,%s,%d,%d,%d,%d\n", username, password, 0, 0, 0, 0);
 	}
 }
 
@@ -528,55 +539,77 @@ bool checkUser(char username[], char password[]){
 	return searchingUser(username, password);
 }
 
-void passwordEnter(char pass[]){
+bool passwordEnter(char pass[]){
 	int i=0;
 	char ps;
 	while((ps = getch()) != '\r'){
-			printf("*");
-			pass[i++] = ps;
+		if (ps == '\b') {
+            if (i > 0) {
+                printf("\b \b");
+                i--;
+            }
+        } else {
+            printf("*");
+            pass[i++] = ps;
+        }
 	}
 	pass[i] = '\0';
-	getchar();
+    return true;
 }
 
 bool userRegis(char username[]){
-	system("cls");
 	while(true){
+		system("cls");
 		printf(BLUE);
 		printf("Enter your username [1-20 characters]:");
 		printf(YELLOW);
 		scanf("%[^\n]", username);
 		getchar();
-	
-		if(isAgent(username) && userLength(username)) return true;
-		else {
+		printf(RESET);
+
+		if(!isAgent(username)){
+			printf(RED);
+			printf("String input must be 'Agent [name]'\n");
+			printf(RESET);
+		} else if(userLength(username)){
+			return true;
+		} else {
 			printf(RED);
 			printf("Must between 1-20 characters\n");
-			printf("String input must be 'Agent [name]'\n");
+			printf(RESET);
 		}
+		printf("Press enter to continue...");
+		getch();
 	}
 	return false;
 }
 
 bool passRegis(char pass[], char passConf[]){
-	system("cls");
 	while(true){
-		
+		system("cls");
 		printf(BLUE);
 		printf("Enter your password [must be alphanumeric]: ");
 		printf(YELLOW);
 		passwordEnter(pass);
+		printf("\n");
 		
 		printf(BLUE);
 		printf("Confirm your password [must be same]: ");
 		printf(YELLOW);
 		passwordEnter(passConf);
-		if(isSame(pass, passConf) && check(passConf) && check(pass) && isSpace(passConf) && isSpace(pass)) {
+		printf("\n");
+
+		if(!isSame(pass, passConf)){
+			printf(RED"Password must be same!\n"RESET);
+		} else if(!check(passConf)){
+			printf(RED"Password must be alphanumeric!\n"RESET);
+		} else if(isSpace(passConf)){
 			return true;
 		} else {
-			printf(RED);
-			printf("Criteria didn't met!\n");
+			printf(RED"Cannot contain spaces!\n"RESET);
 		}
+		printf("Press enter to continue...");
+		getch();
 	}
 	return false;
 }
@@ -585,50 +618,62 @@ bool registerAcc(){
 	char username[21];
 	char password[21];
 	char passwordConfirm[21];
-
 	if(userRegis(username) && passRegis(password, passwordConfirm)){
-		insertUser(username, password);
+		insertUser(username, password, 0, 0, 0, 0);
+		insertUserData(username, password, 0,0,0,0);
+		printf(GREEN"Register Succesfully!\n"RESET);
+		printf("Press enter to continue");
+		getch();
+		return true;
 	}else{
-		return false;
+		printf(RED"Register failed!\n"RESET);
 	}
-
-	return true;
+	printf("Press enter to continue...");
+	getch();
+	return false;
 }
 
 bool loginUser(char username[]){
-		system("cls");
 	while(true){
+		system("cls");
 		printf(BLUE);
 		printf("Enter username: ");
 		printf(YELLOW);
 		scanf("%[^\n]", username);
 		getchar();
 		if(isAdmin(username)) return true;
-		if(userLength(username)){
-			if(isAgent(username)){
-				return true;
-			} else {
-				printf(RED);
-				printf("String input must be 'Agent [name]'\n");
-			}
+
+		if(!userLength(username)){
+			printf(RED"Username length not met!\n"RESET);
+		} else if(isAgent(username)){
+			return true;
+		} else {
+			printf(RED"String input must be 'Agent [name]'!\n"RESET);
 		}
+		printf("Press enter to continue...");
+		getch();
 	}
 	return false;
 }
 
 bool loginPass(char password[]){
-		system("cls");
 	while(true){
+		system("cls");
 		printf(BLUE);
 		printf("Enter yout password: ");
 		printf(YELLOW);
 		passwordEnter(password);
 		if(isSpace(password) && adminConfirm(password)) return true;
-		if(check(password) && isSpace(password)) return true;
-		else {
-			printf(RED);
-			printf("Need to be alphanumeric & cannot contain space!\n");
+
+		if(!check(password)){
+			printf(RED"Should only contain alphanumeric!\n"RESET);
+		} else if(isSpace(password)){
+			return true;
+		} else {
+			printf(RED"Cannot contain spaces!\n"RESET);
 		}
+		printf("Press enter to continue...");
+		getch();
 	}
 	return false;
 }
@@ -643,45 +688,61 @@ bool login(){
 		if(checkUser(username, password)){
 			return true;
 		} else {
-			system("cls");
 			printf(RED);
-			printf("Agent not found! Register it first!\n");
+			printf("Agent not found! Register it first!\n"RESET);
 		}
 	}
+	printf("Press enter to continue...");
+	getch();
 	return false;
 }
 
 bool accountCenter(){
     char hold;
 	system("cls");
-    printf(YELLOW);
-    printf("Welcome Agent!\n");
-    printf(RESET);
-    usleep(2000000);
-    printf("Press any key to continue...");
-    hold = getch(); 
+
+	if(welcoming == 0){
+		welcoming += 1;
+		char *txt = YELLOW "Welcome Agent" RESET;
+		printWithDelay(txt);
+		usleep(2000000);
+		printf("\nPress any key to continue...");
+		hold = getch(); 
+	}
 
     char input;
-    do{
+    while(true){
     	system("cls");
         printf(YELLOW);
         printf("1. Login\n");
         printf("2. Register\n");
+		printf("3. Exit\n");
+		printf(">> ");
         input = getch();
         switch(input){
             case '1':
-				if(login()) return true;
-				else return false;
+				if(login()){
+					loadingAnimation();
+					agentMenu();
+				}
+				else accountCenter();
                 break;
             case '2':
-				if(registerAcc()) return true;
-				else return false;
+				if(registerAcc()){
+					loadingAnimation();
+					agentMenu();
+				}
+				else accountCenter();
                 break;
+			case '3':
+				blink();
+				ExitProcess(0);
+				break;
 			default :
 				printf(RED);
-				printf("Invalid input\n");
+				printf("Invalid input\n"RESET);
         }
-    }while(true);
+    }
 }
 
 //Menu Essential
@@ -712,7 +773,7 @@ void menu(){
     printf("2. Scoreboard\n");
     printf("3. Story\n");
     printf("4. How To\n");
-    printf("5. Exit\n");
+    printf("5. Log out\n");
     printf(RESET);
 	printf(">> ");
 }
@@ -728,23 +789,23 @@ void swicthing(char comms){
             case '4':
                 break;
             case '5':
-                blink();
-				getch();
+				accountCenter();
 				break;
     }
 }
 
-int main(){
+void agentMenu(){
     char input;
-	insertData();
-	// insertPrintData();
-    if(accountCenter()){
-		loadingAnimation();
-		do{
-			menu();
-			input = getch();
-			swicthing(input);      
-		}while(input != '5');
-	}  
+	while(true){
+		menu();
+		input = getch();
+		swicthing(input);
+	}
+}
+
+int main(){
+	printMap();
+	// insertData();
+	// accountCenter(); 
     return 0;
 }

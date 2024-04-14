@@ -621,7 +621,7 @@ bool registerAcc(){
 	if(userRegis(username) && passRegis(password, passwordConfirm)){
 		insertUser(username, password, 0, 0, 0, 0);
 		insertUserData(username, password, 0,0,0,0);
-		printf(GREEN"Register Succesfully!"RESET);
+		printf(GREEN"Register Succesfully!\n"RESET);
 		printf("Press enter to continue");
 		getch();
 		return true;
@@ -804,7 +804,8 @@ void agentMenu(){
 }
 
 int main(){
-	insertData();
-	accountCenter(); 
+	printMap();
+	// insertData();
+	// accountCenter(); 
     return 0;
 }
