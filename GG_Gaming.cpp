@@ -12,8 +12,9 @@
 #define YELLOW  "\033[1;33m"
 #define BLUE    "\033[1;34m"
 #define PURPLE	"\x1b[35m"
-#define ORANGE "\033[0;33m"
-#define SILVER "\033[1;30m"
+#define ORANGE	"\033[0;33m"
+#define SILVER	"\033[1;30m"
+#define PINK 	"\x1b[35;1m"
 #define RESET   "\033[0m"
 #define MAX_ARR 52
 #define SIZE 26
@@ -29,6 +30,7 @@ void splash();
 void loadingAnimation();
 void menuLoading();
 void agentMenu();
+void playSnake();
 
 struct GameData{
 	int snakeScore;
@@ -426,11 +428,34 @@ void printWithDelay(char *str) {
 #define sizeR 25
 #define sizeC 80
 
-int gameover;
-int score = 0;
-int x,y,fruitX, fruitY, flag;
+int gameover, score;
+int x,y,fruitX, fruitY;
+char flag;
 
 //Gaming essential
+void howToSnake(){
+	printf("Press enter to continue...");
+	getch();
+	playSnake();
+}
+
+void init(){
+	gameover = 0;
+	x = sizeR / 2;
+	y = sizeR / 2;
+
+	label1:
+		fruitX =  rand() % 25;
+		if(fruitX == 0) goto label1;
+		
+
+	label2:
+		fruitY =  rand() % 80;
+		if(fruitY == 0) goto label2;
+		
+	score = 0;
+}
+
 void printMap(){
 	system("cls");
 
@@ -455,9 +480,9 @@ void printMap(){
 				printf(GREEN"%c"RESET, 205); 	
 			} else { 
                 if (i == x && j == y) 
-                    printf("0"); 
+                    printf(YELLOW"%c"RESET, 232); 
                 else if (i == fruitX && j == fruitY) 
-                    printf("*"); 
+                    printf(PINK"%c"RESET, 236); 
                 else
                     printf(SILVER"%c"RESET, 176); 
             } 
@@ -477,6 +502,60 @@ void printMap(){
 	}
 	printf("%c"RESET, 188);
 
+	goxy(62, 27);
+	flag = getch();
+
+}
+
+void snakeLogic(){
+	sleep(0.01); 
+    switch (flag) { 
+    case 'a': 
+        y--; 
+        break; 
+    case 's': 
+        x++; 
+        break; 
+    case 'd': 
+        y++; 
+        break; 
+    case 'w': 
+        x--; 
+        break;
+	case '1':
+		break;
+	case '2':
+		break;
+	case '3':
+		break; 
+    default: 
+        break; 
+    } 
+
+	//if hit the wall
+	if (x < 0 || x > sizeC || y < 0 || y > sizeR) gameover = 1; 
+  
+    // If snake reaches the fruit 
+    if (x == fruitX && y == fruitY) { 
+    label3: 
+        fruitX = rand() % 20; 
+        if (fruitX == 0) goto label3; 
+   
+    label4: 
+        fruitY = rand() % 20; 
+        if (fruitY == 0) goto label4; 
+        score += 10; 
+    } 	
+
+}
+
+
+void playSnake(){
+	init();
+	while(!gameover){
+		printMap();
+		snakeLogic();
+	}
 }
 
 //Admin essential
@@ -842,7 +921,8 @@ void agentMenu(){
 
 int main(){
 	system(" ");
-	printMap();
+	playSnake();
+	// printMap();
 	// insertData();ko
 	// accountCenter(); 
     return 0;
