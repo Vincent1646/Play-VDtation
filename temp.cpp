@@ -6,6 +6,7 @@
 #include<conio.h>
 #include<time.h>
 #include<dos.h> 
+#include<oleidl.h>
 
 #define RED     "\033[1;31m"
 #define GREEN   "\033[1;32m"

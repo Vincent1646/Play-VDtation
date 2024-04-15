@@ -11,9 +11,14 @@
 #define GREEN   "\033[1;32m"
 #define YELLOW  "\033[1;33m"
 #define BLUE    "\033[1;34m"
+#define PURPLE	"\x1b[35m"
+#define ORANGE "\033[0;33m"
+#define SILVER "\033[1;30m"
 #define RESET   "\033[0m"
 #define MAX_ARR 52
 #define SIZE 26
+
+#define goxy(x,y) printf("\033[%d;%dH", (y), (x))
 
 typedef long long int ll;
 
@@ -418,28 +423,60 @@ void printWithDelay(char *str) {
 
 
 //Mapping
-int sizeR = 20;
-int sizeC = 20;
-char map[20][20];
+#define sizeR 25
+#define sizeC 80
 
+int gameover;
+int score = 0;
+int x,y,fruitX, fruitY, flag;
 
 //Gaming essential
 void printMap(){
+	system("cls");
+
+	//Top Screen
     for(int i=0; i<sizeR; i++){
         for(int j=0; j<sizeC; j++){
-            if(j == 0 || i == 0 || j==sizeR-1 || i==sizeC-1){
-                map[i][j] = '#';
-            } else {
-                map[i][j] = ' ';
-            }
+            if(j == 0 ||  j==sizeC-1){
+				if(i == 0 && j == 0){
+					printf(BLUE"%c"RESET, 201);
+				}else if(i == 0 && j == sizeC-1){
+					printf(BLUE"%c"RESET, 187);
+				}else if(i == sizeR-1 && j == 0){
+					printf(GREEN"%c"RESET, 204);
+				}else if(i == sizeR-1 && j == sizeC-1){
+					printf(GREEN"%c"RESET, 185);
+				} else {
+               		printf(BLUE"%c"RESET, 186);
+				}
+            } else if(i == 0){
+				printf(BLUE"%c"RESET, 205); 	
+			} else if(i==sizeR-1){
+				printf(GREEN"%c"RESET, 205); 	
+			} else { 
+                if (i == x && j == y) 
+                    printf("0"); 
+                else if (i == fruitX && j == fruitY) 
+                    printf("*"); 
+                else
+                    printf(SILVER"%c"RESET, 176); 
+            } 
         }
+		printf("\n");
     }
-    for(int i=0; i<sizeR; i++){
-        for(int j=0; j<sizeC; j++){
-            printf("%c ", map[i][j]);
-        }
-        puts("");
-    }
+
+	//Bottom Screen
+	char* username = "Agent Vincentius";
+	printf(GREEN"%c   "PURPLE"*Snake Game"GREEN"           %c  "YELLOW"1. How to play   2. Exit"RESET"  "GREEN"%c"RESET"  "ORANGE"%-10s"RESET"     "GREEN"%c"RESET, 186, 186,186, username,186);
+	printf("\n");
+	printf(GREEN"%c   "YELLOW"Score\t: [ "RESET"%d"YELLOW" ]"GREEN"   %c  "YELLOW"3. Logout"RESET"                 "GREEN"%c"RESET"  "YELLOW">>"RESET"                   "GREEN"%c"RESET, 186, score,186,186,186);
+	printf("\n");
+	printf(GREEN"%c", 200);
+	for(int i=0; i<sizeC-2; i++){
+		printf("%c", 205);
+	}
+	printf("%c"RESET, 188);
+
 }
 
 //Admin essential
@@ -804,8 +841,9 @@ void agentMenu(){
 }
 
 int main(){
+	system(" ");
 	printMap();
-	// insertData();
+	// insertData();ko
 	// accountCenter(); 
     return 0;
 }
