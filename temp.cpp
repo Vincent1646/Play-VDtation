@@ -1,152 +1,211 @@
-#include <iostream>
-#include <conio.h>
-#include <windows.h>
-using namespace std;
+#include <ncurses/ncurses.h>
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
 
-const int width = 20;
-const int height = 20;
-int x, y, fruitX, fruitY, score;
-int tailX[100], tailY[100];
-int nTail;
-enum eDirection { STOP = 0, LEFT, RIGHT, UP, DOWN };
-eDirection dir;
 
-void Setup()
-{
-    x = width / 2;
-    y = height / 2;
-    fruitX = rand() % width;
-    fruitY = rand() % height;
-    score = 0;
-    dir = STOP;
-}
+char key;
+int row=24;
+int col=80;
+int iCol=12, iRow=20; //initial column and row
+char show[2];
+int scores;
+char fruit[2] = {'f'};
+int rRow = 8, rCol = 6; //Random row, random column
+int rVal, cVal;
+char name[30];
+int tail = 0;   //adding a tail to the snake
+char pDirection;
 
-void Draw()
-{
-    system("cls");
-    for (int i = 0; i < width + 2; i++)
-        cout << "#";
-    cout << endl;
+int drawFruit(int rVal, int cVal);
+void drawBorders ();
+void printScore(int scr);
+void addingTail(int irow, int icol, int tails, char butt);
 
-    for (int i = 0; i < height; i++)
-    {
-        for (int j = 0; j < width; j++)
+
+
+int main(){
+    initscr();
+    
+    mvprintw(1, 3, "MOVE CURSOR ROUND THE BOX...");
+    printw("Your gamer name: ");
+    scanw("%s", name);
+    refresh();
+    key = '\0';
+    drawBorders();
+    while(key != 'q'){
+        key = getch();
+        /*if(){
+            break;
+        }*/
+        
+        if(key== 'd' || key == KEY_RIGHT){    //d --> right
+            /*iCol += 1;
+            show[0] = '>'; */
+            pDirection = 'r';
+        }
+        else if(key == 'a' || key == KEY_LEFT){    //a --> left
+            /*iCol -= 1;
+            show[0]= '<';*/
+            pDirection = 'l';
+        }
+        else if(key == 'w' || key == KEY_UP){    //w --> up
+            /*iRow -= 1;
+            show[0] = '^';*/
+            pDirection = 'u';
+        }
+        else if(key == 's' || key == KEY_DOWN){    //s --> down
+            /*iRow += 1;
+            show[0] = 'v';*/
+            pDirection = 'd';
+        }
+        if(rRow == iRow && rCol == iCol){
+            drawFruit(iRow, iCol);
+            scores += 1;
+        }
+        if (iRow == 27 || iRow == 3 || iCol == 80 || iCol == 1){
+            break;
+        }
+        tail = scores;   
+
+//Checking and changing the direction
+        switch (pDirection)
         {
-            if (j == 0)
-                cout << "#";
-            if (i == y && j == x)
-                cout << "O";
-            else if (i == fruitY && j == fruitX)
-                cout << "F";
-            else
-            {
-                bool print = false;
-                for (int k = 0; k < nTail; k++)
-                {
-                    if (tailX[k] == j && tailY[k] == i)
-                    {
-                        cout << "o";
-                        print = true;
-                    }
-                }
-                if (!print)
-                    cout << " ";
+            case 'd': {
+                show[0] = 'v';
+                iRow += 1;
+                break;
             }
-
-            if (j == width - 1)
-                cout << "#";
+            case 'l': {
+                show[0] = '<';
+                iCol -= 1;
+                break;
+            }
+            case 'u': {
+                show[0] = '^';
+                iRow -= 1;
+                break;
+            }
+            case 'r': {
+                show[0] = '>';
+                iCol += 1;
+                break;
+            }
         }
-        cout << endl;
-    }
 
-    for (int i = 0; i < width + 2; i++)
-        cout << "#";
-    cout << endl;
-    cout << "Score:" << score << endl;
-}
-
-void Input()
-{
-    if (_kbhit())
-    {
-        switch (_getch())
-        {
-        case 'a':
-            dir = LEFT;
-            break;
-        case 'd':
-            dir = RIGHT;
-            break;
-        case 'w':
-            dir = UP;
-            break;
-        case 's':
-            dir = DOWN;
-            break;
-        case 'x':
-            dir = STOP;
-            break;
-        }
+        clear();
+        drawBorders();
+        mvprintw(rRow, rCol, fruit);    /**/
+        addingTail(iRow, iCol, tail, key);  /**/
+        mvprintw(iRow,iCol,show);   /**/
+        
+        printScore(scores);
+        refresh();
     }
-}
-
-void Logic()
-{
-    int prevX = tailX[0];
-    int prevY = tailY[0];
-    int prev2X, prev2Y;
-    tailX[0] = x;
-    tailY[0] = y;
-    for (int i = 1; i < nTail; i++)
-    {
-        prev2X = tailX[i];
-        prev2Y = tailY[i];
-        tailX[i] = prevX;
-        tailY[i] = prevY;
-        prevX = prev2X;
-        prevY = prev2Y;
-    }
-    switch (dir)
-    {
-    case LEFT:
-        x--;
-        break;
-    case RIGHT:
-        x++;
-        break;
-    case UP:
-        y--;
-        break;
-    case DOWN:
-        y++;
-        break;
-    default:
-        break;
-    }
-    if (x >= width) x = 0; else if (x < 0) x = width - 1;
-    if (y >= height) y = 0; else if (y < 0) y = height - 1;
-
-    for (int i = 0; i < nTail; i++)
-        if (tailX[i] == x && tailY[i] == y)
-            score = 0;
-    if (x == fruitX && y == fruitY)
-    {
-        score += 10;
-        fruitX = rand() % width;
-        fruitY = rand() % height;
-        nTail++;
-    }
-}
-
-int main()
-{
-    Setup();
-    while (score >= 0)
-    {
-        Draw();
-        Input();
-        Logic();
-        Sleep(10); //sleep(10);
-    }
+    mvprintw(29, 3, "\n Great! '%s' score: %d \t Thank you for playing...\n",name, scores);
+  
+    getch();
+    endwin();
     return 0;
+}
+
+/*Generate random Fruits*/
+int drawFruit(int rVal, int cVal){  //Using row and columnn value to generate a random figure
+    rCol = (rand() % (79 - 2 + 1)) + 2;     // rCol = rand()%30;
+    rRow = (rand() % (26 - 4 + 1)) + 4;     //rRow = rand()%30;
+    // number = (rand() % (upper - lower + 1)) + lower
+}
+
+/*Print the score on the top right corner*/
+void printScore(int scr){
+    mvprintw(2, 60, "Score: %d", scr);
+}
+
+char determinePrintingCharacter(int tValue){
+    char characters[5] = {'*', '+', 'o', 'e', '@'};
+    char printCharacter;
+    if(tValue < 5){
+        printCharacter = characters[0];
+    }
+    else if(tValue >= 5 && tValue < 10){
+        printCharacter = characters[1];
+    }
+    else if(tValue >= 10 && tValue < 15){
+        printCharacter = characters[2];
+    }
+    else if(tValue >= 15 && tValue <= 20){
+        printCharacter = characters[3];
+    }
+    else
+    {
+        printCharacter = characters[4];
+    }
+    return printCharacter;
+}
+
+/*Printing tail to the snake*/
+void addingTail(int irow, int icol, int tails, char butt){
+    char showing = determinePrintingCharacter(tails);
+    if (butt == 'a'){
+        while (tails)
+        {
+            mvprintw(irow, icol + tails, "%c", showing);
+            tails--;
+        } 
+    }
+    else if (butt == 'd')
+    {
+        while (tails)
+        {
+            mvprintw(irow, icol - tails, "%c", showing);
+            tails--;
+        }
+    }
+    else if (butt == 's')
+    {
+        while (tails)
+        {
+            mvprintw(irow - tails, icol, "%c", showing);
+            tails--;
+        }   
+    }
+    else if (butt == 'w'){
+        while (tails)
+        {
+            mvprintw(irow + tails, icol, "%c", showing);
+            tails--;
+        }
+    }
+    else
+    {
+        mvprintw(irow,icol, "%c", showing);
+    }
+    
+}
+
+/*Draw the borders of the Game and Show tips*/
+void drawBorders (){
+    mvprintw(2,3,"Designed by ALVINO\n");
+    for(int i=0; i<=24; i++)
+    {
+        printw("|");
+        for(int j=0; j<=80; j++)
+        {
+            if(i==0 || j==80 || i==24)
+            {
+                printw("|");
+            }
+            else{
+                printw(" ");
+            }
+        }
+        printw("\n");
+    }
+    printw("  TIP\t");
+    printw("  d -> right: \t");
+    printw("a -> left \t");
+    printw("w -> up \t");
+    printw("s -> down \t");
+    printw("q -> quit \n");
+    printw("  Arrow keys also work... \n");
 }

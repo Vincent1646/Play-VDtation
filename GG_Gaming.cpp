@@ -1,4 +1,4 @@
-#include <bits/stdc++.h>
+#include<bits/stdc++.h>
 #include<windows.h>
 #include<iostream>
 #include<unistd.h>
@@ -18,8 +18,10 @@
 #define SILVER	"\033[1;30m"
 #define PINK 	"\x1b[35;1m"
 #define RESET   "\033[0m"
-#define MAX_ARR 52
-#define SIZE 26
+#define MAX_ARR	52
+#define SIZE	26
+#define sizeR	25
+#define sizeC	80
 
 #define goxy(x,y) printf("\033[%d;%dH", (y), (x))
 
@@ -27,6 +29,9 @@ typedef long long int ll;
 using namespace std;
 
 int welcoming = 0;
+int gameover, score;
+int x,y,fruitX, fruitY;
+char flag;
 
 void blink();
 void splash();
@@ -428,12 +433,7 @@ void printWithDelay(char *str) {
 
 
 //Mapping
-#define sizeR 25
-#define sizeC 80
 
-int gameover, score;
-int x,y,fruitX, fruitY;
-char flag;
 
 //Gaming essential
 void howToSnake(){
@@ -483,7 +483,7 @@ void printMap(){
 				printf(GREEN"%c"RESET, 205); 	
 			} else { 
                 if (i == x && j == y) 
-                    printf(YELLOW"%c"RESET, 232); 
+                    printf(YELLOW"%c"RESET, 254); 
                 else if (i == fruitX && j == fruitY) 
                     printf(PINK"%c"RESET, 236); 
                 else
@@ -511,7 +511,6 @@ void printMap(){
 }
 
 void snakeLogic(){
-	sleep(0.01); 
     switch (flag) { 
     case 'a': 
         y--; 
