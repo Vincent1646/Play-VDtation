@@ -31,7 +31,7 @@ using namespace std;
 int welcoming = 0;
 int gameover, score;
 int x,y,fruitX, fruitY;
-char flag;
+int flag;
 
 void blink();
 void splash();
@@ -487,7 +487,7 @@ void printMap(){
                 else if (i == fruitX && j == fruitY) 
                     printf(PINK"%c"RESET, 236); 
                 else
-                    printf(SILVER"%c"RESET, 176); 
+                    printf("%c", 176); 
             } 
         }
 		printf("\n");
@@ -505,30 +505,53 @@ void printMap(){
 	}
 	printf("%c"RESET, 188);
 
-	goxy(62, 27);
-	flag = getch();
+	// flag = getch();
+	// fflush(stdin);
 
+}
+
+void input(){ 
+	goxy(62, 27);
+    if (kbhit()) { 
+        switch (getch()) { 
+        case 'a': 
+            flag = 1; 
+            break; 
+        case 's': 
+            flag = 2; 
+            break; 
+        case 'd': 
+            flag = 3; 
+            break; 
+        case 'w': 
+            flag = 4; 
+            break; 
+        case '2': 
+            gameover = 1; 
+            break; 
+        } 
+    } 
 }
 
 void snakeLogic(){
     switch (flag) { 
-    case 'a': 
+    case 1: 
         y--; 
         break; 
-    case 's': 
+    case 2: 
         x++; 
         break; 
-    case 'd': 
+    case 3: 
         y++; 
         break; 
-    case 'w': 
+    case 4: 
         x--; 
         break;
-	case '1':
+	case 5:
 		break;
-	case '2':
+	case 6:
 		break;
-	case '3':
+	case 7:
 		break; 
     default: 
         break; 
@@ -556,6 +579,7 @@ void playSnake(){
 	init();
 	while(!gameover){
 		printMap();
+		input();
 		snakeLogic();
 	}
 }
