@@ -1,4 +1,6 @@
+#include <bits/stdc++.h>
 #include<windows.h>
+#include<iostream>
 #include<unistd.h>
 #include<string.h>
 #include<stdlib.h>
@@ -22,6 +24,7 @@
 #define goxy(x,y) printf("\033[%d;%dH", (y), (x))
 
 typedef long long int ll;
+using namespace std;
 
 int welcoming = 0;
 
