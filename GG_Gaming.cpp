@@ -31,7 +31,7 @@ using namespace std;
 int welcoming = 0;
 int gameover, score;
 int x,y,fruitX, fruitY;
-int flag;
+char flag;
 
 void blink();
 void splash();
@@ -432,11 +432,14 @@ void printWithDelay(char *str) {
 }
 
 
-//Mapping
-
-
-//Gaming essential
+//Gaming
+//Snake Game
 void howToSnake(){
+	for(int i=0; i<sizeR; i++){
+		for(int j=0; j<sizeC; j++){
+			printf("%c", 205);
+		}
+	}
 	printf("Press enter to continue...");
 	getch();
 	playSnake();
@@ -462,7 +465,7 @@ void init(){
 void printMap(){
 	system("cls");
 
-	//Top Screen
+	//Main Screen
     for(int i=0; i<sizeR; i++){
         for(int j=0; j<sizeC; j++){
             if(j == 0 ||  j==sizeC-1){
@@ -472,7 +475,7 @@ void printMap(){
 					printf(BLUE"%c"RESET, 187);
 				}else if(i == sizeR-1 && j == 0){
 					printf(GREEN"%c"RESET, 204);
-				}else if(i == sizeR-1 && j == sizeC-1){
+			}else if(i == sizeR-1 && j == sizeC-1){
 					printf(GREEN"%c"RESET, 185);
 				} else {
                		printf(BLUE"%c"RESET, 186);
@@ -481,13 +484,12 @@ void printMap(){
 				printf(BLUE"%c"RESET, 205); 	
 			} else if(i==sizeR-1){
 				printf(GREEN"%c"RESET, 205); 	
+			} else if (i == x && j == y){
+                printf(YELLOW"%c"RESET, 254); 
+			} else if (i == fruitX && j == fruitY){
+                printf(PINK"%c"RESET, 236); 
 			} else { 
-                if (i == x && j == y) 
-                    printf(YELLOW"%c"RESET, 254); 
-                else if (i == fruitX && j == fruitY) 
-                    printf(PINK"%c"RESET, 236); 
-                else
-                    printf("%c", 176); 
+                printf("%c", 176); 
             } 
         }
 		printf("\n");
@@ -504,47 +506,24 @@ void printMap(){
 		printf("%c", 205);
 	}
 	printf("%c"RESET, 188);
-
-	// flag = getch();
-	// fflush(stdin);
-
+    goxy(62,27);
+    flag = getch();
+    fflush(stdin);
 }
 
-void input(){ 
-	goxy(62, 27);
-    if (kbhit()) { 
-        switch (getch()) { 
-        case 'a': 
-            flag = 1; 
-            break; 
-        case 's': 
-            flag = 2; 
-            break; 
-        case 'd': 
-            flag = 3; 
-            break; 
-        case 'w': 
-            flag = 4; 
-            break; 
-        case '2': 
-            gameover = 1; 
-            break; 
-        } 
-    } 
-}
 
 void snakeLogic(){
     switch (flag) { 
-    case 1: 
+    case 'a': 
         y--; 
         break; 
-    case 2: 
+    case 's': 
         x++; 
         break; 
-    case 3: 
+    case 'd': 
         y++; 
         break; 
-    case 4: 
+    case 'w': 
         x--; 
         break;
 	case 5:
@@ -572,17 +551,21 @@ void snakeLogic(){
         score += 10; 
     } 	
 
-}
-
+} 
 
 void playSnake(){
 	init();
 	while(!gameover){
-		printMap();
-		input();
+	    printMap();
 		snakeLogic();
 	}
 }
+
+
+//BlackJack game
+
+
+
 
 //Admin essential
 void adminMenuSwitch(char input){
