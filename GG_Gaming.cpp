@@ -18,10 +18,11 @@
 #define SILVER	"\033[1;30m"
 #define PINK 	"\x1b[35;1m"
 #define RESET   "\033[0m"
-#define MAX_ARR	52
-#define SIZE	26
-#define sizeR	25
-#define sizeC	80
+#define MAX_ARR		52
+#define SIZE		26
+#define sizeR		25
+#define sizeC		80
+#define startTail	5
 
 #define goxy(x,y) printf("\033[%d;%dH", (y), (x))
 
