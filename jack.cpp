@@ -18,35 +18,37 @@
 #define SILVER	"\033[1;30m"
 #define PINK 	"\x1b[35;1m"
 #define RESET   "\033[0m"
-#define MAX_ARR		52
-#define SIZE		26
-#define sizeR		25
-#define sizeC		80
-#define startTail	5
+#define MAX_ARR		    52
+#define SIZE		    26
+#define sizeR		    25
+#define sizeC		    80
+#define startTail	    10
 
 #define goxy(x,y) printf("\033[%d;%dH", (y), (x))
 
 typedef long long int ll;
 using namespace std;
 
-int welcoming = 0;
-
 int tailX[startTail], tailY[startTail];
-int a, b, c, x, y;
-int tailLength = 0;
-int gameover;
-int score;
 int fruitX, fruitY;
+int tailLength = 0;
+int welcoming = 0;
+int a, b, c;
+int gameover;
 char flag;
+int score;
 
 
-void initialize(){
+//Snake coordinate
+void initializeSnake(){
     a = 30; 
     b = 18;
-	gameover = 0;
-	x = sizeR / 2;
-	y = sizeR / 2;
+	gameover = 0;	
+	score = 0;
+}
 
+//Fruit coordinate
+void initializeFruit(){
 	label1:
 		fruitX =  rand() % 25;
 		if(fruitX == 0) goto label1;
@@ -55,8 +57,6 @@ void initialize(){
 	label2:
 		fruitY =  rand() % 80;
 		if(fruitY == 0) goto label2;
-		
-	score = 0;
 }
 
 void printMap(){
@@ -100,7 +100,7 @@ void printMap(){
 	}
 	printf("%c"RESET, 188);
 
-    char *startMessage = "To Play Press [Shift]";
+    char *startMessage = "To Play Press [Space]";
     goxy(30, 18);
     printf(startMessage);
 
@@ -109,63 +109,107 @@ void printMap(){
     fflush(stdin);
 }
 
-void logic(){
+//Snake Movement
+void snakeMove(const char c){
+    //Non Logic condition
+    if(c == 'q'){ 
+        printMap();
+    }
+
+    // Snake Logic 
+    if(c == 'a' && a > 2){
+        a--;
+    } else if (c == 'a' && a == 2){
+        a = sizeC-1;
+    }
+
+    if(c == 'd' && a < sizeC-1){
+        a++;
+    } else if (c == 'd' && a == sizeC-1){
+        a = 2;
+    }
+
+    if(c == 'w' && b > 2){
+        b--;
+    } else if (c == 'w' && b == 2){
+        b = sizeR-1;
+    }
+
+    if(c == 's' && b < sizeR-1){
+        b++;
+    } else if (c == 's' && b == sizeR-1){
+        b = 2;
+    }
+}
+
+// Snake Body Logic
+void snakeBody(){
+    if(tailLength == startTail){
+        goxy(tailX[tailLength-1], tailY[tailLength-1]);
+        printf("%c", 176);
+        for(int i = tailLength - 1; i > 0; i--){
+            tailX[i] = tailX[i - 1];
+            tailY[i] = tailY[i - 1];
+        }
+    } else {
+        for(int i = tailLength; i > 0; i--){
+            tailX[i] = tailX[i - 1];
+            tailY[i] = tailY[i - 1];
+        }
+        tailLength++;
+    }
+
+    // Updating Snake Head
+    tailX[0] = a;
+    tailY[0] = b;
+}
+
+// Snake Draw
+void snakeDraw(){
+    for(int i = 0; i < tailLength; i++){
+        goxy(tailX[i], tailY[i]);
+        printf(YELLOW"%c"RESET, 219);
+    }
+}
+
+//Snake Game
+void SnakeGame(){
     while(true){
         if(kbhit()){
             c = getch();
-            if(c == 'q'){ // Jika tombol 'q' ditekan, keluar dari program
-                break;
-            }
 
-            // Memperbarui posisi kepala berdasarkan input
-            if(c == 'a' && a > 1){
-                a--;
-            }
-            if(c == 'd' && a < 80){
-                a++;
-            }
-            if(c == 'w' && b > 1){
-                b--;
-            }
-            if(c == 's' && b < 25){
-                b++;
-            }
-
-            // Menghapus ekor terlama
-            if(tailLength == startTail){
-                goxy(tailX[tailLength-1], tailY[tailLength-1]);
-                printf("%c", 176);
-                for(int i = tailLength - 1; i > 0; i--){
-                    tailX[i] = tailX[i - 1];
-                    tailY[i] = tailY[i - 1];
-                }
-            } else {
-                for(int i = tailLength; i > 0; i--){
-                    tailX[i] = tailX[i - 1];
-                    tailY[i] = tailY[i - 1];
-                }
-                tailLength++;
-            }
-
-            // Memperbarui posisi kepala di array ekor
-            tailX[0] = a;
-            tailY[0] = b;
-
-            // Menggambar kepala dan ekor
-            for(int i = 0; i < tailLength; i++){
-                goxy(tailX[i], tailY[i]);
-                printf(YELLOW"%c"RESET, 219);
-            }
+            snakeMove(c);
+            snakeBody();
+            snakeDraw();
+            
         }
+    }
+}
+
+void snakeSwitch(){
+    switch(flag){
+        case ' ':
+            SnakeGame();
+            break;
+        case '1':
+            break;
+        case '2':
+            break;
+        case '3':
+            break;
+        default:
+            break;
     }
 }
 
 
 int main(){
-    initialize();
+    srand(time(0));
+
+    initializeSnake();
+    initializeFruit();
     printMap();
-    logic();
-    
+    snakeSwitch();
 
     return 0;
 }
