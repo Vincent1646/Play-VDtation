@@ -22,7 +22,7 @@
 #define SIZE		    26
 #define sizeR		    25
 #define sizeC		    80
-#define startTail	    10
+#define startTail	    5
 
 #define goxy(x,y) printf("\033[%d;%dH", (y), (x))
 
@@ -38,7 +38,6 @@ int gameover;
 char flag;
 int score;
 
-
 //Snake coordinate
 void initializeSnake(){
     a = 30; 
@@ -50,13 +49,19 @@ void initializeSnake(){
 //Fruit coordinate
 void initializeFruit(){
 	label1:
-		fruitX =  rand() % 25;
-		if(fruitX == 0) goto label1;
+		fruitX =  rand() % (sizeC - 2) + 1;
+		if(fruitX <= 2) goto label1;
+        if(fruitX == a) goto label1;
+        if(fruitX >= sizeC-1) goto label1;
+       
 		
 
 	label2:
-		fruitY =  rand() % 80;
-		if(fruitY == 0) goto label2;
+		fruitY =  rand() % (sizeR - 2) + 1;
+		if(fruitY <= 2) goto label2;
+        if(fruitY == b) goto label2;
+        if(fruitY >= sizeR-1) goto label2;
+        
 }
 
 void printMap(){
@@ -92,7 +97,7 @@ void printMap(){
 	char* username = "Agent Vincentius";
 	printf(GREEN"%c   "PURPLE"*Snake Game"GREEN"           %c  "YELLOW"1. How to play   2. Exit"RESET"  "GREEN"%c"RESET"  "ORANGE"%-10s"RESET"     "GREEN"%c"RESET, 186, 186,186, username,186);
 	printf("\n");
-	printf(GREEN"%c   "YELLOW"Score\t: [ "RESET"%d"YELLOW" ]"GREEN"   %c  "YELLOW"3. Logout"RESET"                 "GREEN"%c"RESET"  "YELLOW">>"RESET"                   "GREEN"%c"RESET, 186, score,186,186,186);
+	printf(GREEN"%c   "YELLOW"Score\t: [ "RESET" "YELLOW" ]"GREEN"   %c  "YELLOW"3. Logout"RESET"                 "GREEN"%c"RESET"  "YELLOW">>"RESET"                   "GREEN"%c"RESET, 186,186,186,186);
 	printf("\n");
 	printf(GREEN"%c", 200);
 	for(int i=0; i<sizeC-2; i++){
@@ -164,12 +169,38 @@ void snakeBody(){
     tailY[0] = b;
 }
 
-// Snake Draw
+// Fruit Draw
+void snakeFruitDraw(){
+    goxy(fruitX, fruitY);
+    printf(PINK"%c"RESET, 254);
+}
+
+//Snake Draw
 void snakeDraw(){
     for(int i = 0; i < tailLength; i++){
         goxy(tailX[i], tailY[i]);
         printf(YELLOW"%c"RESET, 219);
     }
+}
+
+void scoreDraw(){
+    goxy(20,27);
+    printf(YELLOW"%d"RESET, score);
+}
+
+//Snake Fruit Eat
+void snakeFruitEat(){
+    if(a == fruitX && b == fruitY){
+        initializeFruit();
+        tailLength++;
+        score+=10;
+        printMap();
+    }
+}
+
+void draw(){
+    snakeDraw();
+    snakeFruitDraw();
 }
 
 //Snake Game
@@ -180,12 +211,13 @@ void SnakeGame(){
 
             snakeMove(c);
             snakeBody();
-            snakeDraw();
-            
+            draw();
+            snakeFruitEat();
         }
     }
 }
 
+//Switch in Menu
 void snakeSwitch(){
     switch(flag){
         case ' ':
@@ -201,7 +233,6 @@ void snakeSwitch(){
             break;
     }
 }
-
 
 int main(){
     srand(time(0));
